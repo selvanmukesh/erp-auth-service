@@ -3,6 +3,8 @@ package com.example.erp_auth_service.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,8 @@ import com.example.erp_auth_service.dto.RegisterRequest;
 import com.example.erp_auth_service.model.User;
 import com.example.erp_auth_service.repository.UserRepository;
 import com.example.erp_auth_service.util.JwtUtil;
+import org.springframework.lang.NonNull;
+
 
 @Service
 public class UserService {
@@ -23,9 +27,14 @@ public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    public Page<User> getUsers(@NonNull Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
     public String login(LoginRequest request) throws Exception {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        System.out.println("user--->" + user.getEmail() + "-----" + user.getPassword());
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid password");
@@ -43,7 +52,7 @@ public class UserService {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(hashedPassword);
         return userRepository.save(user);
 
     }

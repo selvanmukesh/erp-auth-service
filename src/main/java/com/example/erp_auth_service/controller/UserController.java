@@ -13,11 +13,12 @@ import com.example.erp_auth_service.util.JwtUtil;
 
 import jakarta.validation.Valid;
 
-import java.util.Arrays;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,10 +34,22 @@ public class UserController {
     UserService userService;
 
     // @PreAuthorize("hasRole('ADMIN')")
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @GetMapping("/callMe")
-    public String getMethodName() {
-        return "hello";
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<User>>> getUsers(@NonNull Pageable pageable) {
+        try {
+
+            ApiResponse<Page<User>> apiResponse = new ApiResponse<Page<User>>(userService.getUsers(pageable), "Success",
+                    HttpStatus.OK.value(),
+                    null);
+            return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        } catch (Exception e) {
+            ApiResponse<Page<User>> apiResponse = new ApiResponse<>(null, ".Failed",
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    e.getMessage());
+
+            return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/login")
@@ -44,7 +57,7 @@ public class UserController {
         try {
             String token = userService.login(request);
             ApiResponse<String> apiResponse = new ApiResponse<String>(token, "Login Success", HttpStatus.OK.value(),
-                    getMethodName());
+                    null);
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
         } catch (Exception e) {
 
