@@ -20,7 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -83,6 +85,54 @@ public class UserController {
         } catch (Exception e) {
 
             ApiResponse<RegisterResponse> apiResponse = new ApiResponse<>(null, "User creation failed",
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    e.getMessage());
+
+            return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable Long id) {
+
+        try {
+
+            ApiResponse<User> apiResponse = new ApiResponse<>(userService.getUserById(id),
+                    "Success",
+                    HttpStatus.OK.value(),
+                    null);
+
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            ApiResponse<User> apiResponse = new ApiResponse<>(null,
+                    "Failed",
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    e.getMessage());
+
+            return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<ApiResponse<String>> softDeleteUser(@PathVariable Long id) {
+
+        try {
+
+            String message = userService.softDeleteUser(id);
+
+            ApiResponse<String> apiResponse = new ApiResponse<>(message,
+                    "Success",
+                    HttpStatus.OK.value(),
+                    null);
+
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            ApiResponse<String> apiResponse = new ApiResponse<>(null,
+                    "Failed",
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     e.getMessage());
 

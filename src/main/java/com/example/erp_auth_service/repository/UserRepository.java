@@ -11,4 +11,6 @@ import com.example.erp_auth_service.model.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByIdAndDeletedFalse(Long id);
+
 }

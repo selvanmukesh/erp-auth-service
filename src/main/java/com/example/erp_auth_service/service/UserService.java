@@ -15,7 +15,6 @@ import com.example.erp_auth_service.repository.UserRepository;
 import com.example.erp_auth_service.util.JwtUtil;
 import org.springframework.lang.NonNull;
 
-
 @Service
 public class UserService {
     @Autowired
@@ -55,5 +54,22 @@ public class UserService {
         user.setPassword(hashedPassword);
         return userRepository.save(user);
 
+    }
+
+    public User getUserById(Long id) throws Exception {
+
+        return userRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public String softDeleteUser(Long id)  throws Exception{
+
+        User user = userRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setDeleted(true);
+        userRepository.save(user);
+
+        return "User deleted successfully";
     }
 }
