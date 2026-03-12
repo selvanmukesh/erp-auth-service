@@ -140,4 +140,27 @@ public class UserController {
         }
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout() {
+
+        try {
+
+            ApiResponse<String> apiResponse = new ApiResponse<>("Logout successful",
+                    "Success",
+                    HttpStatus.OK.value(),
+                    null);
+
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            ApiResponse<String> apiResponse = new ApiResponse<>(null,
+                    "Logout Failed",
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    e.getMessage());
+
+            return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
