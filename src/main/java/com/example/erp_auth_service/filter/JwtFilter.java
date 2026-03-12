@@ -51,16 +51,15 @@ public class JwtFilter extends OncePerRequestFilter {
                     String username = jwtUtil.extractUsername(token);
                     String[] roles = jwtUtil.extractRoles(token);
 
-                    List<SimpleGrantedAuthority> authorities =
-                            Arrays.stream(roles)
-                                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                                    .collect(Collectors.toList());
+                    List<SimpleGrantedAuthority> authorities = Arrays.stream(roles)
+                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                            .collect(Collectors.toList());
 
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null,
+                            authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                }else{
+                } else {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("Token expired or Invalid Token");
                     return;
@@ -79,5 +78,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 response.getWriter().write("Invalid token");
             }
         }
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        System.out.println("enter-------------->");
+        String path = request.getServletPath();
+        return path.equals("/auth/login") || path.equals("/auth/register");
     }
 }
