@@ -8,9 +8,12 @@ import com.example.erp_auth_service.dto.LoginRequest;
 import com.example.erp_auth_service.dto.RegisterRequest;
 import com.example.erp_auth_service.dto.RegisterResponse;
 import com.example.erp_auth_service.model.User;
+import com.example.erp_auth_service.service.RefreshTokenService;
 import com.example.erp_auth_service.service.UserService;
 import com.example.erp_auth_service.util.JwtUtil;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -35,6 +38,9 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    RefreshTokenService refreshTokenService;
+
     // @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
@@ -55,9 +61,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody LoginRequest request,
+            HttpServletResponse response) {
         try {
-            String token = userService.login(request);
+            String token = userService.login(request, response);
             ApiResponse<String> apiResponse = new ApiResponse<String>(token, "Login Success", HttpStatus.OK.value(),
                     null);
             return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
@@ -74,6 +81,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
         try {
+            System.out.println("receieved---------->");
             User user = userService.saveUser(request);
             RegisterResponse registerResponse = new RegisterResponse(user.getName(), user.getEmail());
             ApiResponse<RegisterResponse> apiResponse = new ApiResponse<>(registerResponse, "Created Successfully",
@@ -141,10 +149,11 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<String>> logout() {
+    public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
 
         try {
 
+            refreshTokenService.logout(request);
             ApiResponse<String> apiResponse = new ApiResponse<>("Logout successful",
                     "Success",
                     HttpStatus.OK.value(),
